@@ -6,24 +6,27 @@
 
 int main()
 {
-	// PlaySound(TEXT("C:\\Library\Audio\\bottlecap.wav"), NULL, SND_FILENAME | SND_SYNC | SND_NODEFAULT);
-	// std::cout << "Hello World!\n";
+	// SendMessage(HWND_BROADCAST, WM_APPCOMMAND, 0, MAKELONG(0, APPCOMMAND_MEDIA_STOP));
+	keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_EXTENDEDKEY, 0);
 
-	SendKeystrokes(L"hello", L"Notepad");
+	// SendKeystrokes(L"hello", L"Notepad");
+
+
+	return 0;
 }
 
 
-int SendKeystrokes(const TCHAR* const text, const std::wstring lpClassName)
+int SendKeystrokes(const TCHAR* const text, const std::wstring& lpClassName)
 {
 	assert(text != NULL);
 
-	HWND hWnd = FindWindow(lpClassName.c_str(), nullptr);
+	HWND const hWnd = FindWindow(lpClassName.c_str(), nullptr);
 
 	if (hWnd == nullptr)
 		return 0;
 
-	HWND fw = GetForegroundWindow();
-	std::string sz = std::format("{} {}", (void*)fw, (void*)hWnd);
+	HWND const fw = GetForegroundWindow();
+	const std::string sz = std::format("{} {}", static_cast<void*>(fw), static_cast<void*>(hWnd));
 	OutputDebugStringA(sz.c_str());
 
 	if (!SetForegroundWindow(hWnd))
@@ -33,26 +36,29 @@ int SendKeystrokes(const TCHAR* const text, const std::wstring lpClassName)
 	const UINT characterCount = _tcslen(text);
 	const UINT keystrokesToSend = characterCount * 2;
 
-	auto keystroke = new INPUT[keystrokesToSend];
+	const auto keystroke = new INPUT[keystrokesToSend];
 
 	for (UINT i = 0; i < characterCount; ++i) {
-		keystroke[i * 2].type = INPUT_KEYBOARD;
-		keystroke[i * 2].ki.wVk = 0;
-		keystroke[i * 2].ki.wScan = text[i];
-		keystroke[i * 2].ki.dwFlags = KEYEVENTF_UNICODE;
-		keystroke[i * 2].ki.time = 0;
-		keystroke[i * 2].ki.dwExtraInfo = GetMessageExtraInfo();
+		const UINT i1 = i * 2;
+		const UINT i2 = i1 + 1;
 
-		keystroke[i * 2 + 1].type = INPUT_KEYBOARD;
-		keystroke[i * 2 + 1].ki.wVk = 0;
-		keystroke[i * 2 + 1].ki.wScan = text[i];
-		keystroke[i * 2 + 1].ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
-		keystroke[i * 2 + 1].ki.time = 0;
-		keystroke[i * 2 + 1].ki.dwExtraInfo = GetMessageExtraInfo();
+		keystroke[i1].type = INPUT_KEYBOARD;
+		keystroke[i1].ki.wVk = 0;
+		keystroke[i1].ki.wScan = text[i];
+		keystroke[i1].ki.dwFlags = KEYEVENTF_UNICODE;
+		keystroke[i1].ki.time = 0;
+		keystroke[i1].ki.dwExtraInfo = GetMessageExtraInfo();
+
+		keystroke[i2].type = INPUT_KEYBOARD;
+		keystroke[i2].ki.wVk = 0;
+		keystroke[i2].ki.wScan = text[i];
+		keystroke[i2].ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
+		keystroke[i2].ki.time = 0;
+		keystroke[i2].ki.dwExtraInfo = GetMessageExtraInfo();
 	}
 
 	//Send the keystrokes.
-	const UINT keystrokesSent = SendInput((UINT)keystrokesToSend, keystroke, sizeof(*keystroke));
+	const UINT keystrokesSent = SendInput(keystrokesToSend, keystroke, sizeof*keystroke);
 
 	delete[] keystroke;
 

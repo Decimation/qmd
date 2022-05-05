@@ -14,5 +14,5 @@
 #endif
 
 int main();
-int SendKeystrokes(const TCHAR* const text, const std::wstring lpClassName);
+int SendKeystrokes(const TCHAR* const text, const std::wstring& lpClassName);
 
